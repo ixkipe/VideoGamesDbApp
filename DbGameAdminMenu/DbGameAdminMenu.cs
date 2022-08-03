@@ -9,7 +9,26 @@ class DbGameAdminMenu {
     this._connection = connection;
   }
 
-  public async Task AddGame() {
+  public async Task AddGames(){
+    bool quit = false;
+    while (!quit)
+    {
+      await AddGame();
+      System.Console.WriteLine("Add another game? (Y/N)");
+      var cki = Console.ReadKey();
+
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
+          continue;
+        default:
+          quit = true;
+          break;
+      }
+    }
+  }
+
+  private async Task AddGame() {
     BitArray ba = new(new bool[]{true, true, true, true});
     VideoGameAddDataModel game = new();
 
@@ -35,16 +54,15 @@ class DbGameAdminMenu {
       System.Console.WriteLine($"Title: {game.Title}\nDeveloper: {game.Developer}\nPlatformID: {game.PlatformID}\nCover URL: {game.CoverUrl}");
       System.Console.WriteLine("Is everything correct? (Y/N)");
       var cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           ba[0] = false;
           break;
         default: break;
       }
     }
-
+    
     await _connection.QueryAsync(
       "VideoGames.spGames_AddGame", 
       new {Title = game.Title, Developer = game.Developer, PlatformID = game.PlatformID, CoverURL = game.CoverUrl}, 
@@ -59,10 +77,9 @@ class DbGameAdminMenu {
       System.Console.WriteLine();
       System.Console.WriteLine("Add another one? (Y/N)");
       var cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           continue;
         default: break;
       }
@@ -72,10 +89,9 @@ class DbGameAdminMenu {
         System.Console.WriteLine(screenshot);
 
       cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           ba[1] = false;
           break;
         default:
@@ -101,10 +117,9 @@ class DbGameAdminMenu {
 
       System.Console.WriteLine("Add another one? (Y/N)");
       var cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           continue;
         default: break;
       }
@@ -114,10 +129,9 @@ class DbGameAdminMenu {
         System.Console.WriteLine(genre);
 
       cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           ba[2] = false;
           break;
         default: 
@@ -143,10 +157,9 @@ class DbGameAdminMenu {
 
       System.Console.WriteLine("Add another one? (Y/N)");
       var cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           continue;
         default: break;
       }
@@ -156,10 +169,9 @@ class DbGameAdminMenu {
         System.Console.WriteLine(mode);
 
       cki = Console.ReadKey();
-      switch (cki.Key){
-        case ConsoleKey.Y:
-        case ConsoleKey.Enter:
-        case ConsoleKey.Spacebar:
+      switch (cki.KeyChar.ToString().ToLower()){
+        case "y":
+        case "н":
           ba[3] = false;
           break;
         default: 
