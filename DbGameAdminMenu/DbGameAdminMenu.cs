@@ -2,9 +2,9 @@ using RecMeAnOldieWebAPI.Models;
 using System.Collections;
 
 class DbGameAdminMenu {
-  SqlConnection _connection;
+  NpgsqlConnection _connection;
 
-  public DbGameAdminMenu(SqlConnection connection)
+  public DbGameAdminMenu(NpgsqlConnection connection)
   {
     this._connection = connection;
   }
@@ -42,7 +42,7 @@ class DbGameAdminMenu {
       game.Developer = Console.ReadLine();
       System.Console.WriteLine();
 
-      System.Console.Write("Platform (1. NES 2. Genesis 3. SNES): ");
+      System.Console.Write("Platform (1. NES 2. Genesis 3. SNES 4. PC): ");
       game.PlatformID = Int32.Parse(Console.ReadLine());
       System.Console.WriteLine();
 
@@ -62,13 +62,16 @@ class DbGameAdminMenu {
         default: break;
       }
     }
+    int id = 0;
     
-    await _connection.QueryAsync(
-      "VideoGames.spGames_AddGame", 
-      new {Title = game.Title, Developer = game.Developer, PlatformID = game.PlatformID, CoverURL = game.CoverUrl}, 
-      commandType: System.Data.CommandType.StoredProcedure);
+    Task.Run(async () => {
+      await _connection.QueryAsync(
+        GameDbStoredProcedures.AddGame, 
+        new {title = game.Title, developer = game.Developer, platformid = game.PlatformID, coverurl = game.CoverUrl});
 
-    int id = await _connection.QueryFirstAsync<int>("select count(*) from VideoGames.Games");
+      id = await _connection.QueryFirstAsync<int>("select count(*) from \"VideoGames\".\"Games\"");
+    });
+
 
     while (ba[1])
     {
@@ -102,9 +105,8 @@ class DbGameAdminMenu {
 
     foreach (var screenshot in game.ScreenshotUrlList)
       await _connection.QueryAsync(
-        "VideoGames.spGames_AddScreenshot", 
-        new {GameID = id, ScreenshotURL = screenshot}, 
-        commandType: System.Data.CommandType.StoredProcedure);
+        GameDbStoredProcedures.AddScreenshot, 
+        new {gameid = id, screenshoturl = screenshot});
     
     var genres = await GetGenres();
     System.Console.WriteLine("Genres reference:");
@@ -142,9 +144,8 @@ class DbGameAdminMenu {
 
     foreach (var genre in game.GenreList)
       await _connection.QueryAsync(
-        "VideoGames.spGames_AddGenre", 
-        new {GameID = id, GenreID =  genre}, 
-        commandType: System.Data.CommandType.StoredProcedure);
+        GameDbStoredProcedures.AddGenre, 
+        new {gameid = id, genreid =  genre});
 
     var modes = await GetModes();
     System.Console.WriteLine("Modes reference:");
@@ -181,20 +182,19 @@ class DbGameAdminMenu {
 
       foreach (var mode in game.ModeList)
         await _connection.QueryAsync(
-          "VideoGames.spGames_Add2PMode", 
-          new{GameID = id, ModeID = mode}, 
-          commandType: System.Data.CommandType.StoredProcedure);
+          GameDbStoredProcedures.AddMode, 
+          new{gameid = id, modeid = mode});
 
     }
   }
 
   private async Task<List<string>> GetGenres(){
-    var result = await _connection.QueryAsync<string>("select genre_name from VideoGames.Genres");
+    var result = await _connection.QueryAsync<string>("select genre_name from \"VideoGames\".\"Genres\"");
     return result.ToList();
   }
 
   private async Task<List<string>> GetModes(){
-    var result = await _connection.QueryAsync<string>("select mode from VideoGames.TwoPlayerModes");
+    var result = await _connection.QueryAsync<string>("select mode from \"VideoGames\".\"TwoPlayerModes\"");
     return result.ToList();
   }
 }

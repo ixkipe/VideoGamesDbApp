@@ -1,2 +1,2 @@
-global using Microsoft.Data.SqlClient;
+global using Npgsql;
 global using Dapper;

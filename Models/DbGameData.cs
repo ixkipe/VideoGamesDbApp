@@ -2,9 +2,9 @@
 {
   public class DbGameDataAccess
   {
-    SqlConnection _connection;
+    NpgsqlConnection _connection;
 
-    public DbGameDataAccess(SqlConnection connection)
+    public DbGameDataAccess(NpgsqlConnection connection)
     {
       this._connection = connection;
     }
@@ -15,17 +15,16 @@
       List<string> genres = new();
       List<string> modes = new();
 
-      var dbScreenshotsData = await _connection.QueryAsync<string>("VideoGames.spGames_GetScreenshotsByID", new { gameId = id }, commandType: System.Data.CommandType.StoredProcedure);
+      var dbScreenshotsData = await _connection.QueryAsync<string>("spGames_GetScreenshots", new { gameId = id }, commandType: System.Data.CommandType.Text);
       foreach (var screenshot in dbScreenshotsData) screenshots.Add(screenshot);
 
-      var dbGenresData = await _connection.QueryAsync<string>("VideoGames.spGames_GetGenresByID", new { gameId = id }, commandType: System.Data.CommandType.StoredProcedure);
+      var dbGenresData = await _connection.QueryAsync<string>("spGames_GetGenres", new { gameId = id }, commandType: System.Data.CommandType.Text);
       foreach (var genre in dbGenresData) genres.Add(genre);
 
-      var dbModesData = await _connection.QueryAsync<string>("VideoGames.spGames_GetModesByID", new { gameId = id }, commandType: System.Data.CommandType.StoredProcedure);
+      var dbModesData = await _connection.QueryAsync<string>("spGames_GetModes", new { gameId = id }, commandType: System.Data.CommandType.Text);
       foreach (var mode in dbModesData) modes.Add(mode);
 
-      var dbGameData = await _connection.QueryFirstAsync<VideoGamePartial>("VideoGames.spGames_GetGame", new { gameId = id }, commandType: System.Data.CommandType.StoredProcedure);
-
+      var dbGameData = await _connection.QueryFirstAsync<VideoGamePartial>("spGames_GetGame", new { gameId = id }, commandType: System.Data.CommandType.Text);
       return new VideoGame()
       {
         Id = id,
