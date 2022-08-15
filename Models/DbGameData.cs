@@ -11,20 +11,14 @@
 
     public async Task<VideoGame> GetGameById(int id)
     {
-      List<string> screenshots = new();
-      List<string> genres = new();
-      List<string> modes = new();
+      var dbScreenshotsData = await _connection.QueryAsync<string>(GameDbStoredProcedures.GetScreenshots, new { gameid = id });
 
-      var dbScreenshotsData = await _connection.QueryAsync<string>("spGames_GetScreenshots", new { gameId = id }, commandType: System.Data.CommandType.Text);
-      foreach (var screenshot in dbScreenshotsData) screenshots.Add(screenshot);
+      var dbGenresData = await _connection.QueryAsync<string>(GameDbStoredProcedures.GetGenres, new { gameid = id });
 
-      var dbGenresData = await _connection.QueryAsync<string>("spGames_GetGenres", new { gameId = id }, commandType: System.Data.CommandType.Text);
-      foreach (var genre in dbGenresData) genres.Add(genre);
+      var dbModesData = await _connection.QueryAsync<string>(GameDbStoredProcedures.GetModes, new { gameid = id });
 
-      var dbModesData = await _connection.QueryAsync<string>("spGames_GetModes", new { gameId = id }, commandType: System.Data.CommandType.Text);
-      foreach (var mode in dbModesData) modes.Add(mode);
-
-      var dbGameData = await _connection.QueryFirstAsync<VideoGamePartial>("spGames_GetGame", new { gameId = id }, commandType: System.Data.CommandType.Text);
+      var dbGameData = await _connection.QueryFirstAsync<VideoGamePartial>(GameDbStoredProcedures.GetGame, new { gameid = id });
+      
       return new VideoGame()
       {
         Id = id,
@@ -32,9 +26,9 @@
         Developer = dbGameData.Developer,
         Platform_Name = dbGameData.Platform_Name,
         Cover_Url = dbGameData.Cover_Url,
-        ScreenshotUrlList = screenshots,
-        GenreList = genres,
-        ModeList = modes
+        ScreenshotUrlList = dbScreenshotsData.ToList(),
+        GenreList = dbGenresData.ToList(),
+        ModeList = dbModesData.ToList()
       };
     }
   }
